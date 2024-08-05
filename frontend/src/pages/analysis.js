@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import loadingImage from './loading.png';
 import './analysis.css';
 import Alignment from './Alignment';
+import { useLocation } from 'react-router-dom';
 
 function Analysis() {
   let [tab, setTab] = useState(0);
@@ -13,6 +14,10 @@ function Analysis() {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   const [show, setShow] = useState(false);
+  /* parkki */
+  const location = useLocation();
+  const { responseBody } = location.state || {}; // 전달된 상태를 받아옴
+  /* parkki */
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -58,6 +63,12 @@ function Analysis() {
               </Nav.Item>
             </Nav>
             <Tab tab={tab} />
+            {/*parkki 넣을 곳이 마땅치 않아서 아무곳에나 출력함 */}
+            <div>
+              <h3>Server Response</h3>
+              <pre>{JSON.stringify(responseBody, null, 2)}</pre>
+            </div>
+            {/*parkki */}
           </>
         </div>
       )}
