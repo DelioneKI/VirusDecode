@@ -65,39 +65,53 @@ function InputSeq() {
       setResponseMessage('요청 중 오류 발생: ' + error.message);
     }
   };
+  
   // next button 클릭시 서버로 (Sequence ID, file, sequence)전송 
   const handleFileUploadToServer = async (e) => {
     e.preventDefault(); // 폼의 기본 제출 동작 방지
-    const formData = new FormData();
-    // files가 존재할 경우에만 formData에 추가
-    if (uploadedFiles.length > 0) {
-      uploadedFiles.forEach((uploadedFile, index) => {
-        formData.append(`file${index}`, uploadedFile.file, uploadedFile.name);
-      });
-    }
 
-    // sequences가 존재할 경우에만 formData에 추가
-    if (sequences.length > 0) {
-      sequences.forEach((seq, index) => {
-        formData.append(`sequence${index}`, seq.value);
-      });
-    }
+    // sequences를 Map 형태로 변환
+    const sequencesMap = new Map();
 
-    setIsLoading(true);
+    sequences.forEach((seq) => {
+      sequencesMap.set(seq.name, seq.value);
+    });
+
+    // 모든 파일을 문자열로 읽기
+    const filesContent = await Promise.all(
+      uploadedFiles.map(async (uploadedFile) => {
+        const content = await uploadedFile.file.text(); // 파일을 텍스트로 읽기
+        return { name: uploadedFile.name, content: content };
+      })
+    );
+
+    // Map을 일반 객체로 변환하여 JSON 객체 생성
+    const jsonData = {
+      referenceSequenceId,
+      sequences: Object.fromEntries(sequencesMap), // sequencesMap을 객체로 변환하여 포함
+      files: filesContent, // 파일 내용을 포함
+    };
+
     try {
-      const response = await fetch('http://localhost:8080/inputSeq/analyze', { 
+      const response = await fetch('http://localhost:8080/inputSeq/analyze', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(jsonData),
       });
-      const result = await response.json();
+
+      setIsLoading(true);
+      const result = await response.text();
       setIsLoading(false);
-      console.log(result);
-      window.alert(JSON.stringify(result)); // 응답을 경고창으로 출력
-      navigate('./analysis', { state: { responseBody: result } }); // 서버 응답의 body를 전달
+      console.log("분석이 끝났습니다!"+result);
+      window.alert("분석이 끝났습니다!\n"+JSON.stringify(result)); // 응답을 경고창으로 출력
+      navigate('/analysis', { state: { responseBody: result } }); // 서버 응답의 body를 전달
     } catch (error) {
-      setIsLoading(false);
-      console.error('Error uploading files:', error);
+      console.error('요청 중 오류 발생:', error);
+      setResponseMessage('요청 중 오류 발생: ' + error.message);
     }
+
   };
   /*parkki */
 

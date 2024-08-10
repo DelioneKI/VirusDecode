@@ -1,16 +1,12 @@
 package VirusDecode.backend.controller;
 
 
-import VirusDecode.backend.dto.SequenceRequest;
+import VirusDecode.backend.dto.ReferenceSequenceRequest;
+import VirusDecode.backend.dto.VarientSequenceRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -21,9 +17,8 @@ import java.util.Map;
 @RequestMapping("/inputSeq")
 public class inputSeqController {
 
-    
     @PostMapping("/reference")
-    public ResponseEntity<String> processDone(@RequestBody SequenceRequest request) {
+    public ResponseEntity<String> processDone(@RequestBody ReferenceSequenceRequest request) {
         String sequenceId = request.getSequenceId();
         // 여기서 sequenceId를 사용하여 필요한 처리를 수행합니다.
         System.out.println("Processing DONE for sequence ID: " + sequenceId);
@@ -35,21 +30,19 @@ public class inputSeqController {
     }
 
     @PostMapping("/analyze")
-    public ResponseEntity<Map<String, Object>> analyze(@RequestParam("sequenceId") String sequenceId,
-                                                       @RequestParam(value = "files", required = false) MultipartFile[] files,
-                                                       @RequestParam(value = "sequences", required = false) String[] sequences) {
-        // 파일, 시퀀스 처리 로직 필요
+    public ResponseEntity<String> handleSequences(@RequestBody VarientSequenceRequest request) {
+        // sequence의 value들을 처리
+        StringBuilder processedMessage = new StringBuilder("Processed sequences: ");
 
-        // JSON 응답 생성
-        Map<String, Object> response = new HashMap<>();
-        response.put("sequenceId", sequenceId);
-        response.put("message", "Files processed successfully");
+        Map<String, String> sequences = request.getSequences();
+        sequences.forEach((key, value) -> {
+            processedMessage.append(key).append(": ").append(value).append("; ");
+        });
 
-        // 실제 응답 데이터 로직
-        // response.put("data", ...);
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        // 처리된 결과를 JSON 형식으로 클라이언트에게 전송
+        return ResponseEntity.ok(processedMessage.toString());
     }
+
 
 
     // reference id --> metadata ( MAP )

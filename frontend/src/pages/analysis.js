@@ -19,30 +19,9 @@ function Analysis() {
   const { responseBody } = location.state || {}; // 전달된 상태를 받아옴
   /* parkki */
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setLoadingText((prev) => {
-        if (prev === 'Analyzing...') return 'Analyzing';
-        return prev + '.';
-      });
-    }, 500);
-
-    setTimeout(() => {
-      setIsLoading(false);
-      clearInterval(interval);
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <div>
-      {isLoading ? (
-        <div className="loading-container">
-          <img src={loadingImage} alt="Loading..." className="loading-image" />
-          <div className="loading-text">{loadingText}</div>
-        </div>
-      ) : (
         <div className={`analysis-container ${show ? 'shrink' : ''}`}>
           <>
             <Nav variant="tabs" defaultActiveKey="link0" className="justify-content-center">
@@ -71,7 +50,6 @@ function Analysis() {
             {/*parkki */}
           </>
         </div>
-      )}
     </div>
   );
 }
